@@ -8,9 +8,8 @@ import type { FormInstance } from "element-plus";
 import { useLayout } from "@/layout/hooks/useLayout";
 import { useUserStoreHook } from "@/store/modules/user";
 import { initRouter, getTopMenu } from "@/router/utils";
-import { bg, avatar, illustration } from "./utils/static";
 import { useRenderIcon } from "@/components/ReIcon/src/hooks";
-import { ref, reactive, toRaw, onMounted, onBeforeUnmount } from "vue";
+import { ref, reactive, onMounted, onBeforeUnmount } from "vue";
 import { useDataThemeChange } from "@/layout/hooks/useDataThemeChange";
 
 import dayIcon from "@/assets/svg/day.svg?component";
@@ -18,32 +17,40 @@ import darkIcon from "@/assets/svg/dark.svg?component";
 import Lock from "@iconify-icons/ri/lock-fill";
 import User from "@iconify-icons/ri/user-3-fill";
 
+import VueTurnstile from "vue-turnstile";
+
 defineOptions({
   name: "Login"
 });
 const router = useRouter();
 const loading = ref(false);
 const ruleFormRef = ref<FormInstance>();
+const turnstileRef = ref();
 
 const { initStorage } = useLayout();
 initStorage();
 
 const { dataTheme, dataThemeChange } = useDataThemeChange();
 dataThemeChange();
+
 const { title } = useNav();
 
 const ruleForm = reactive({
-  username: "admin",
-  password: "admin123"
+  username: "",
+  password: "",
+  turnstileToken: ""
 });
 
+const siteKey = "0x4AAAAAAADTjxwv-xmN3Bzh";
+
 const onLogin = async (formEl: FormInstance | undefined) => {
+  console.log(dataTheme);
   loading.value = true;
   if (!formEl) return;
   await formEl.validate((valid, fields) => {
     if (valid) {
       useUserStoreHook()
-        .loginByUsername({ username: ruleForm.username, password: "admin123" })
+        .loginByUsername({ ruleForm })
         .then(res => {
           if (res.success) {
             // 获取后端路由
@@ -52,6 +59,12 @@ const onLogin = async (formEl: FormInstance | undefined) => {
               message("登录成功", { type: "success" });
             });
           }
+        })
+        .catch(err => {
+          console.log(err);
+          message(err.message, { type: "error" });
+          turnstileRef.value.reset();
+          loading.value = false;
         });
     } else {
       loading.value = false;
@@ -77,9 +90,9 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <div class="select-none">
-    <img :src="bg" class="wave" />
-    <div class="flex-c absolute right-5 top-3">
+  <div class="select-none login-container-bg">
+    <!-- <img :src="bg" class="wave" /> -->
+    <div class="absolute flex-c right-5 top-3">
       <!-- 主题 -->
       <el-switch
         v-model="dataTheme"
@@ -91,11 +104,11 @@ onBeforeUnmount(() => {
     </div>
     <div class="login-container">
       <div class="img">
-        <component :is="toRaw(illustration)" />
+        <!-- <component :is="toRaw(illustration)" /> -->
       </div>
       <div class="login-box">
         <div class="login-form">
-          <avatar class="avatar" />
+          <!-- <avatar class="avatar" /> -->
           <Motion>
             <h2 class="outline-none">{{ title }}</h2>
           </Motion>
@@ -138,6 +151,16 @@ onBeforeUnmount(() => {
               </el-form-item>
             </Motion>
 
+            <Motion :delay="200">
+              <el-form-item prop="turnstileToken">
+                <VueTurnstile
+                  ref="turnstileRef"
+                  v-model="ruleForm.turnstileToken"
+                  :site-key="siteKey"
+                />
+              </el-form-item>
+            </Motion>
+
             <Motion :delay="250">
               <el-button
                 class="w-full mt-4"
@@ -163,5 +186,10 @@ onBeforeUnmount(() => {
 <style lang="scss" scoped>
 :deep(.el-input-group__append, .el-input-group__prepend) {
   padding: 0;
+}
+
+.login-container-bg {
+  background: url("@/assets/login/bg.jpg") center center fixed no-repeat;
+  background-size: cover;
 }
 </style>

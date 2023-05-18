@@ -22,6 +22,17 @@ const loginRules = reactive(<FormRules>{
       },
       trigger: "blur"
     }
+  ],
+  turnstileToken: [
+    {
+      validator: (rule, value, callback) => {
+        if (value === "") {
+          callback(new Error("请进行人机验证"));
+        } else {
+          callback();
+        }
+      }
+    }
   ]
 });
 
