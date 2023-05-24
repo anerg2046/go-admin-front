@@ -1,10 +1,6 @@
 import { http } from "@/utils/http";
-import { baseUrlApi } from "./utils";
-type Result = {
-  success: boolean;
-  data: Array<any>;
-};
+import { baseUrlApi, ApiResult } from "./utils";
 
 export const getAsyncRoutes = () => {
-  return http.request<Result>("get", baseUrlApi("/getAsyncRoutes"));
+  return http.request<ApiResult>("get", baseUrlApi("/get_routers"));
 };

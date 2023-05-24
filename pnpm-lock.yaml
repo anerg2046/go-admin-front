@@ -25,6 +25,9 @@ dependencies:
   dayjs:
     specifier: ^1.11.7
     version: 1.11.7
+  deepmerge:
+    specifier: ^4.3.1
+    version: 4.3.1
   echarts:
     specifier: ^5.4.2
     version: 5.4.2
@@ -3451,6 +3454,14 @@ packages:
         integrity: sha512-oIPzksmTg4/MriiaYGO+okXDT7ztn/w3Eptv/+gSIdMdKsJo0u4CfYNFJPy+4SKMuCqGw2wxnA+URMg3t8a/bQ==
       }
     dev: true
+
+  /deepmerge@4.3.1:
+    resolution:
+      {
+        integrity: sha512-3sUqbMEc77XqpdNO7FRyRog+eW3ph+GYCbj+rK+uYyRMuwsVy0rMiVtPn+QJlKFvWP/1PYpapqYn0Me2knFn+A==
+      }
+    engines: { node: ">=0.10.0" }
+    dev: false
 
   /define-lazy-prop@2.0.0:
     resolution:

@@ -36,6 +36,13 @@ export function useNav() {
     return useUserStoreHook()?.username;
   });
 
+  // 用户头像
+  const avatar = computed(() => {
+    return username.value
+      ? `https://api.multiavatar.com/${username.value}.png`
+      : "";
+  });
+
   const avatarsStyle = computed(() => {
     return username.value ? { marginRight: "10px" } : "";
   });
@@ -150,6 +157,7 @@ export function useNav() {
     isCollapse,
     pureApp,
     username,
+    avatar,
     avatarsStyle,
     tooltipEffect
   };

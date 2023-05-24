@@ -158,7 +158,10 @@ export function useTags() {
   });
 
   const getContextMenuStyle = computed((): CSSProperties => {
-    return { left: buttonLeft.value + "px", top: buttonTop.value + "px" };
+    return {
+      left: buttonLeft.value + "px",
+      top: buttonTop.value + "px"
+    };
   });
 
   const closeMenu = () => {

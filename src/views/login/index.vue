@@ -11,6 +11,7 @@ import { initRouter, getTopMenu } from "@/router/utils";
 import { useRenderIcon } from "@/components/ReIcon/src/hooks";
 import { ref, reactive, onMounted, onBeforeUnmount } from "vue";
 import { useDataThemeChange } from "@/layout/hooks/useDataThemeChange";
+// import { avatar } from "./utils/static";
 
 import dayIcon from "@/assets/svg/day.svg?component";
 import darkIcon from "@/assets/svg/dark.svg?component";
@@ -44,15 +45,14 @@ const ruleForm = reactive({
 const siteKey = "0x4AAAAAAADTjxwv-xmN3Bzh";
 
 const onLogin = async (formEl: FormInstance | undefined) => {
-  console.log(dataTheme);
   loading.value = true;
   if (!formEl) return;
   await formEl.validate((valid, fields) => {
     if (valid) {
       useUserStoreHook()
-        .loginByUsername({ ruleForm })
+        .loginByUsername(ruleForm)
         .then(res => {
-          if (res.success) {
+          if (res) {
             // 获取后端路由
             initRouter().then(() => {
               router.push(getTopMenu(true).path);
@@ -61,7 +61,6 @@ const onLogin = async (formEl: FormInstance | undefined) => {
           }
         })
         .catch(err => {
-          console.log(err);
           message(err.message, { type: "error" });
           turnstileRef.value.reset();
           loading.value = false;

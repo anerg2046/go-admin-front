@@ -15,6 +15,7 @@ const {
   onPanel,
   pureApp,
   username,
+  avatar,
   avatarsStyle,
   toggleSideBar
 } = useNav();
@@ -45,11 +46,8 @@ const {
       <Notice id="header-notice" />
       <!-- 退出登录 -->
       <el-dropdown trigger="click">
-        <span class="el-dropdown-link navbar-bg-hover select-none">
-          <img
-            src="https://avatars.githubusercontent.com/u/44761321?v=4"
-            :style="avatarsStyle"
-          />
+        <span class="select-none el-dropdown-link navbar-bg-hover">
+          <img :src="avatar" :style="avatarsStyle" />
           <p v-if="username" class="dark:text-white">{{ username }}</p>
         </span>
         <template #dropdown>
