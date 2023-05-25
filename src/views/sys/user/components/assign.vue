@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { assignUser, listRole } from "@/api/system";
 import { message } from "@/utils/message";
-import { AxiosError } from "axios";
+import { requestHook } from "@/utils/request";
 import { onActivated, ref } from "vue";
 
 defineOptions({
@@ -16,14 +16,8 @@ const user = ref();
 const checkRoles = ref([]);
 
 const fetchRole = async () => {
-  try {
-    const { data } = await listRole();
-    roleList.value = data;
-  } catch (e) {
-    if ((e as AxiosError)?.response?.status === 401) {
-      message(e.response.data.msg, { type: "error" });
-    }
-  }
+  const { data } = await requestHook(listRole());
+  roleList.value = data;
 };
 
 const showAssign = row => {
@@ -47,20 +41,12 @@ const save = async () => {
     roles: [...checkRoles.value],
     id: user.value.id
   };
-  try {
-    const { code, msg } = await assignUser(data);
-    if (code === 0) {
-      message("提交成功", { type: "success" });
-      emit("fetch-data");
-      closeDialog();
-    } else {
-      message(msg, { type: "error" });
-    }
-  } catch (e) {
-    if ((e as AxiosError)?.response?.status === 401) {
-      message(e.response.data.msg, { type: "error" });
-    }
-    console.log(e);
+
+  const { code } = await requestHook(assignUser(data));
+  if (code === 0) {
+    message("提交成功", { type: "success" });
+    emit("fetch-data");
+    closeDialog();
   }
 };
 

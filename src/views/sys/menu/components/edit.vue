@@ -1,13 +1,12 @@
 <script lang="ts" setup>
 import { ref } from "vue";
 import { FormInstance } from "element-plus";
-import { listMenu } from "@/api/system";
+import { listMenu, editMenu } from "@/api/system";
 import { clone } from "@pureadmin/utils";
 import { formRules } from "../utils/rules";
 import { message } from "@/utils/message";
-import { editMenu } from "@/api/system";
 import { ReEdit } from "@/components/ReEdit";
-import { AxiosError } from "axios";
+import { requestHook } from "@/utils/request";
 
 defineOptions({
   name: "SysMenuManagementEdit"
@@ -52,19 +51,10 @@ const submitForm = async (formEl: FormInstance | undefined) => {
   if (!formEl) return;
   await formEl.validate(async valid => {
     if (valid) {
-      try {
-        const { code, msg } = await editMenu(formData.value);
-        if (code === 0) {
-          message("提交成功", { type: "success" });
-          closeDialog();
-        } else {
-          message(msg, { type: "error" });
-        }
-      } catch (e) {
-        if ((e as AxiosError)?.response?.status === 401) {
-          message(e.response.data.msg, { type: "error" });
-        }
-        console.log(e);
+      const { code } = await requestHook(editMenu(formData.value));
+      if (code === 0) {
+        message("提交成功", { type: "success" });
+        closeDialog();
       }
     }
   });
@@ -72,33 +62,22 @@ const submitForm = async (formEl: FormInstance | undefined) => {
 
 const showEditWithParent = (pid: number) => {
   if (pid >= 0) {
-    // formVisible.value = true;
-    // title.value = "添加菜单";
-    // isAdd.value = true;
-    // formData.value.parent_id = pid;
     showEdit({ parent_id: pid });
   }
 };
 
 const fetchData = async () => {
-  try {
-    const { data } = await listMenu();
-    treeData.value = [
-      {
-        id: 0,
-        parent_id: 0,
-        meta: {
-          title: "顶级菜单"
-        },
-        children: data
-      }
-    ];
-  } catch (e) {
-    if ((e as AxiosError)?.response?.status === 401) {
-      message(e.response.data.msg, { type: "error" });
+  const { data } = await requestHook(listMenu());
+  treeData.value = [
+    {
+      id: 0,
+      parent_id: 0,
+      meta: {
+        title: "顶级菜单"
+      },
+      children: data
     }
-    console.log(e);
-  }
+  ];
 };
 
 const showLable = (data: any) => {

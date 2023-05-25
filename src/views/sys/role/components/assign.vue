@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import { permissionRole, listMenu, assignRole } from "@/api/system";
 import { message } from "@/utils/message";
-import { AxiosError } from "axios";
+import { requestHook } from "@/utils/request";
 import { nextTick, onActivated, ref } from "vue";
 
 defineOptions({
@@ -15,15 +15,8 @@ const role = ref();
 const permission = ref();
 
 const fetchMenu = async () => {
-  try {
-    const { data } = await listMenu();
-    permission.value = data;
-  } catch (e) {
-    if ((e as AxiosError)?.response?.status === 401) {
-      message(e.response.data.msg, { type: "error" });
-    }
-    console.log(e);
-  }
+  const { data } = await requestHook(listMenu());
+  permission.value = data;
 };
 
 const showAssign = row => {
@@ -42,26 +35,19 @@ const closeDialog = () => {
 const initCheckoutTree = async () => {
   // 初始化需要等dom元素加载完毕以后在进行获取ref
   nextTick(async () => {
-    try {
-      // defaultCheckedKeys:后端返回的选中id [1,3,4,56,7,8,9,223]
-      await treeRef.value.setCheckedKeys([]);
-      const { data } = await permissionRole({ id: role.value.id });
-      for (const key of data) {
-        // getNode（获取tree中对应的节点）
-        const node = treeRef.value.getNode(key);
+    // defaultCheckedKeys:后端返回的选中id [1,3,4,56,7,8,9,223]
+    await treeRef.value.setCheckedKeys([]);
+    const { data } = await requestHook(permissionRole({ id: role.value.id }));
+    for (const key of data) {
+      // getNode（获取tree中对应的节点）
+      const node = treeRef.value.getNode(key);
+      treeRef.value.setChecked(node, true);
+      // isLeaf（判断节点是否为叶子节点）
+      // 如果存在isLeaf 代表是叶子节点为最后一级那么就选中即可 不是则不选择
+      if (node?.isLeaf) {
+        // setChecked （设置tree中对应的节点为选中状态）
         treeRef.value.setChecked(node, true);
-        // isLeaf（判断节点是否为叶子节点）
-        // 如果存在isLeaf 代表是叶子节点为最后一级那么就选中即可 不是则不选择
-        if (node?.isLeaf) {
-          // setChecked （设置tree中对应的节点为选中状态）
-          treeRef.value.setChecked(node, true);
-        }
       }
-    } catch (e) {
-      if ((e as AxiosError)?.response?.status === 401) {
-        message(e.response.data.msg, { type: "error" });
-      }
-      console.log(e);
     }
   });
 };
@@ -78,7 +64,7 @@ const showLable = (data: any) => {
   return data.meta?.title;
 };
 
-const save = () => {
+const save = async () => {
   const data = {
     menu_ids: [
       ...treeRef.value.getCheckedKeys(),
@@ -87,22 +73,11 @@ const save = () => {
     id: role.value.id
   };
   if (data.menu_ids.length > 0) {
-    (async () => {
-      try {
-        const { code, msg } = await assignRole(data);
-        if (code === 0) {
-          message("提交成功", { type: "success" });
-          closeDialog();
-        } else {
-          message(msg, { type: "error" });
-        }
-      } catch (e) {
-        if ((e as AxiosError)?.response?.status === 401) {
-          message(e.response.data.msg, { type: "error" });
-        }
-        console.log(e);
-      }
-    })();
+    const { code } = await requestHook(assignRole(data));
+    if (code === 0) {
+      message("提交成功", { type: "success" });
+      closeDialog();
+    }
   }
 };
 

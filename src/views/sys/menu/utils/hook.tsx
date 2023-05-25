@@ -1,7 +1,7 @@
 import { listMenu, delMenu } from "@/api/system";
 import { ref, onMounted } from "vue";
 import { message } from "@/utils/message";
-import { AxiosError } from "axios";
+import { requestHook } from "@/utils/request";
 
 export function useSysMenuManagement(editRef: any) {
   const dataList = ref([]);
@@ -9,17 +9,9 @@ export function useSysMenuManagement(editRef: any) {
 
   async function fetchData() {
     loading.value = true;
-    try {
-      const { data } = await listMenu();
-      dataList.value = data;
-    } catch (e) {
-      if ((e as AxiosError)?.response?.status === 401) {
-        message(e.response.data.msg, { type: "error" });
-      }
-      console.log(e);
-    } finally {
-      loading.value = false;
-    }
+    const { data } = await requestHook(listMenu());
+    dataList.value = data;
+    loading.value = false;
   }
 
   function handleEdit(row: any) {
@@ -39,19 +31,10 @@ export function useSysMenuManagement(editRef: any) {
   }
 
   async function handleDelete(row: any) {
-    try {
-      const { code, msg } = await delMenu({ id: row.id });
-      if (code === 0) {
-        message("删除成功", { type: "success" });
-        fetchData();
-      } else {
-        message(msg, { type: "error" });
-      }
-    } catch (e) {
-      if ((e as AxiosError)?.response?.status === 401) {
-        message(e.response.data.msg, { type: "error" });
-      }
-      console.log(e);
+    const { code } = await requestHook(delMenu({ id: row.id }));
+    if (code === 0) {
+      message("删除成功", { type: "success" });
+      fetchData();
     }
   }
 

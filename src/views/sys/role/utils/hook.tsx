@@ -1,7 +1,7 @@
 import { ref, onMounted } from "vue";
 import { delRole, listRole } from "@/api/system";
 import { message } from "@/utils/message";
-import { AxiosError } from "axios";
+import { requestHook } from "@/utils/request";
 
 export const useSysRoleManagement = (editRef, assignRef) => {
   const dataList = ref([]);
@@ -22,36 +22,31 @@ export const useSysRoleManagement = (editRef, assignRef) => {
   };
 
   async function handleDelete(row: any) {
-    try {
-      const { code, msg } = await delRole({ id: row.id });
-      if (code === 0) {
-        message("删除成功", { type: "success" });
-        fetchData();
-      } else {
-        message(msg, { type: "error" });
-      }
-    } catch (e) {
-      if ((e as AxiosError)?.response?.status === 401) {
-        message(e.response.data.msg, { type: "error" });
-      }
-      console.log(e);
+    const { code } = await requestHook(delRole({ id: row.id }));
+    if (code === 0) {
+      message("删除成功", { type: "success" });
+      fetchData();
     }
   }
 
   const fetchData = async () => {
     loading.value = true;
-    try {
-      const { data } = await listRole();
-      dataList.value = data;
-    } catch (e) {
-      if ((e as AxiosError)?.response?.status === 401) {
-        message(e.response.data.msg, { type: "error" });
-      }
-      dataList.value = [];
-      console.log(e);
-    } finally {
-      loading.value = false;
-    }
+    const { data } = await requestHook(listRole());
+    dataList.value = data;
+    loading.value = false;
+
+    // try {
+    //   const { data } = await listRole();
+    //   dataList.value = data;
+    // } catch (e) {
+    //   if ((e as AxiosError)?.response?.status === 401) {
+    //     message(e.response.data.msg, { type: "error" });
+    //   }
+    //   dataList.value = [];
+    //   console.log(e);
+    // } finally {
+    //   loading.value = false;
+    // }
   };
 
   onMounted(() => {

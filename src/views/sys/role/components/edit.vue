@@ -6,7 +6,7 @@ import { message } from "@/utils/message";
 import { ReEdit } from "@/components/ReEdit";
 import { ref, watch } from "vue";
 import { editRole } from "@/api/system";
-import { AxiosError } from "axios";
+import { requestHook } from "@/utils/request";
 
 defineOptions({
   name: "SysRoleManagementEdit"
@@ -44,19 +44,10 @@ const submitForm = async (formEl: FormInstance | undefined) => {
   if (!formEl) return;
   await formEl.validate(async valid => {
     if (valid) {
-      try {
-        const { code, msg } = await editRole(formData.value);
-        if (code === 0) {
-          message("提交成功", { type: "success" });
-          closeDialog();
-        } else {
-          message(msg, { type: "error" });
-        }
-      } catch (e) {
-        if ((e as AxiosError)?.response?.status === 401) {
-          message(e.response.data.msg, { type: "error" });
-        }
-        console.log(e);
+      const { code } = await requestHook(editRole(formData.value));
+      if (code === 0) {
+        message("提交成功", { type: "success" });
+        closeDialog();
       }
     }
   });
