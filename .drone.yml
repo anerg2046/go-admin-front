@@ -71,6 +71,6 @@ steps:
 
 trigger:
   branch:
-    - release/master
+    - main
   event:
     - push
