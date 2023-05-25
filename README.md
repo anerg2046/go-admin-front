@@ -1,3 +1,15 @@
+# GO-ADMIN-FRONT
+
+[![license](https://img.shields.io/github/license/anerg2046/go-admin-front.svg)](LICENSE)
+
+## 简介
+
+本项目是基于 [pure-admin-thin](https://github.com/pure-admin/pure-admin-thin) 非国际化精简版开发的通用后台基础代码
+
+配套的后端代码为 [go-admin-server](https://github.com/anerg2046/go-admin-server)
+
+---
+
 <h1>vue-pure-admin精简版（非国际化版本）</h1>
 
 [![license](https://img.shields.io/github/license/pure-admin/vue-pure-admin.svg)](LICENSE)
