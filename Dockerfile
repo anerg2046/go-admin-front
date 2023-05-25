@@ -2,14 +2,12 @@ FROM node:lts-alpine as builder
 
 WORKDIR /app
 
-COPY package.json ./
+COPY . .
 RUN set -xe \
   && node -v \
   && npm install -g pnpm \
-  && pnpm install
-
-COPY . .
-RUN pnpm build
+  && pnpm install \
+  && pnpm build
 
 # 运行环境
 FROM caddy:2-alpine
