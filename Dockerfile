@@ -5,6 +5,7 @@ WORKDIR /app
 COPY package.json ./
 RUN set -xe \
   && node -v \
+  && npm install -g pnpm \
   && pnpm install
 
 COPY . .
