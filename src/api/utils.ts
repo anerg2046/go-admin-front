@@ -7,5 +7,5 @@ export interface ApiResult {
 export const baseUrlApi = (url: string): string => {
   return process.env.NODE_ENV === "development"
     ? `http://172.20.174.21:8020/v1${url}`
-    : `http://172.20.174.21:8020/v1${url}`;
+    : `https://admin-api.fabraze.com/v1${url}`;
 };
