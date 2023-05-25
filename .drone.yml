@@ -18,7 +18,8 @@ steps:
       use_cache: true
       registry:
         from_secret: harbor_address
-      repo: ${registry}/drone/${DRONE_REPO_NAME}
+      repo:
+        from_secret: harbor_repo
       username:
         from_secret: harbor_user
       password:
