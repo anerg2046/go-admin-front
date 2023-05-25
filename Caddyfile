@@ -1,0 +1,6 @@
+:80 {
+	encode zstd gzip
+    file_server {
+        root /var/www/html
+    }
+}

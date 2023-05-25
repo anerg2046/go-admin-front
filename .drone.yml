@@ -1,0 +1,76 @@
+kind: pipeline
+name: goAdmin-前端
+type: docker
+
+clone:
+  depth: 1
+
+steps:
+  - name: build-image-and-push
+    pull: if-not-exists
+    image: plugins/docker
+    settings:
+      storage_driver: vfs
+      tags:
+        - latest
+        - ${DRONE_BUILD_NUMBER}
+      insecure: true
+      use_cache: true
+      registry:
+        from_secret: harbor_address
+      repo: ${registry}/drone/${DRONE_REPO_NAME}
+      username:
+        from_secret: harbor_user
+      password:
+        from_secret: harbor_pass
+      context: ./
+      dockerfile: ./Dockerfile
+    when:
+      status:
+        - success
+
+  - name: send telegram notification
+    image: appleboy/drone-telegram
+    pull: if-not-exists
+    when:
+      status:
+        - success
+        - failure
+    settings:
+      token:
+        from_secret: telegram_token
+      to:
+        from_secret: telegram_to
+      format: markdown
+      message: >
+        {{#success build.status}}
+        ✅ Build #{{build.number}} of `{{repo.name}}` succeeded.
+        📝 Commit by {{commit.author}} on `{{commit.branch}}`:
+        ```
+        {{commit.message}}
+        ```
+        🌐 {{ build.link }}
+        {{else}}
+        ❌ Build #{{build.number}} of `{{repo.name}}` failed.
+        📝 Commit by {{commit.author}} on `{{commit.branch}}`:
+        ```
+        {{commit.message}}
+        ```
+        🌐 {{ build.link }}
+        {{/success}}
+
+  - name: deploy
+    image: alpine
+    pull: if-not-exists
+    commands:
+      - sed -i 's/dl-cdn.alpinelinux.org/mirrors.tuna.tsinghua.edu.cn/g' /etc/apk/repositories
+      - apk update
+      - apk --no-cache add curl
+      # portainer hook
+      # - curl -XPOST http://192.168.1.9:9000/api/stacks/webhooks/ba7ab0fd-c0b2-47f2-806d-3cfa416cf464
+
+trigger:
+  branch:
+    - release/master
+  event:
+    - push
